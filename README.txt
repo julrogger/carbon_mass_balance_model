@@ -6,4 +6,5 @@ To run the model:
 2) Define parameter space
 3) Run the main model script -> currently coded to run chunks of the paramter space for use in parallel on a HPC cluster
 
-Manuscript with further detail currently in revision. 
+Manuscript with more details currently in revision.
+In case of questions or problems with the code, feel free to write a message to: jul.rogger@gmail.com
