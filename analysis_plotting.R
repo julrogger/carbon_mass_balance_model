@@ -106,22 +106,18 @@ temp_imbalance_immediate_per <- ggplot() +
   geom_hline(yintercept = 0, linetype = 2, col = "black") +
   geom_ribbon(data = subset(re_out_df, disp_par == 4000 & therm_adapt == 60/1e+6),
               aes(x = time_geol, ymin = min_imbalance_per*100, ymax=max_imbalance_per*100, fill = adaptation_capacity), alpha = 0.8, fill = "darkgrey") +
-  # geom_ribbon(data = subset(re_out_df, disp_par == 650 & therm_adapt == 0.025/1e+6),
-  #             aes(x = time_geol, ymin = min_imbalance_per*100, ymax=max_imbalance_per*100, fill = adaptation_capacity), alpha = 0.8) +
-  # geom_ribbon(data = subset(re_out_df, disp_par == 650 & therm_adapt == 0.05/1e+6),
-  #             aes(x = time_geol, ymin = min_imbalance_per*100, ymax=max_imbalance_per*100, fill = adaptation_capacity), alpha = 0.8) +
   theme_bw() +
   ylab(expression(Carbon ~ Imabalance ~ "(%)"))  +
   coord_geo(xlim=c(390, 0), ylim=c(-40, 60), dat = list("periods", "eras"), pos = list("b", "b"), abbrv = list(TRUE, FALSE), alpha = 0.8, size = 1.5, lwd = 0.01, height = unit(0.4, "line")) +
   border() + theme(legend.position="left") +
   theme(text = element_text(size = 6))  +
   theme(legend.key.size = unit(0.35, "cm")) +
-  scale_x_reverse("Age (Ma)",expand=c(0.2, 0)) +
-  theme(axis.title.x = element_text(vjust= 8)) +
+  scale_x_reverse() +
   theme(plot.margin = unit(c(0.25, 0.25, 0, 0), "cm")) +
   theme(legend.position = "left", legend.box.spacing = unit(0, "pt")) +
-  xlim(c(390, 0)) +
-  xlab("")
+  xlim(c(390, 0)) + 
+  xlab("Age (Ma)") + 
+  theme(axis.title.x = element_text(vjust= 1))
 temp_imbalance_immediate_per
 
 # supplementary imalance plot percentage for best balanced scenarios
@@ -141,17 +137,16 @@ temp_imbalance_bestbalanced_per <- ggplot() +
   theme(text = element_text(size = 6))  +
   theme(legend.key.size = unit(0.35, "cm")) +
   scale_x_reverse("Age (Ma)",expand=c(0.2, 0)) +
-  theme(axis.title.x = element_text(vjust= 8)) +
   theme(plot.margin = unit(c(0.25, 0.25, 0, 0), "cm")) +
   theme(legend.position = "left", legend.box.spacing = unit(0, "pt")) +
   xlim(c(390, 0)) +
-  xlab("")
+  xlab("Age (Ma)") +
+  theme(axis.title.x = element_text(vjust= 1))
 temp_imbalance_bestbalanced_per
 
 
 # 2) Plot the temporal imbalance for different adaptation capacities --------------------------------------------------------------------------------------------------------------------------------------
 # Sort by adaptation capacity (therm + disp) --> stats over all climate and degassing trajectories
-
 split_list <- split(out_df, f=list(out_df$therm_adapt, out_df$disp_par))
 re_out <- lapply(split_list, FUN=function(input){
   min <- aggregate(input$dA, by = list(input$time), FUN = min)$x
@@ -179,7 +174,6 @@ re_out_df$time_geol <- re_out_df$time/(-1e+6)
 re_out_df$adaptation_capacity <- interaction(re_out_df$therm_adapt, re_out_df$disp_par)
 temp_imbalance <- ggplot(subset(re_out_df, disp_par == 650 & therm_adapt < 6.0e-05 | (disp_par == 4000 & therm_adapt == 6.0e-05))) + 
   geom_ribbon(aes(x = time_geol, ymin = min_dA, ymax=max_dA, fill = as.factor(adaptation_capacity)), alpha = 1) +
-  # geom_line(aes(x = time_geol, y = median_dA, col = as.factor(adaptation_capacity)), alpha = 1) +
   theme_bw() + 
   geom_hline(yintercept = 0, linetype = 2, col = "darkgrey") + 
   ylab(ylab)  +
@@ -302,10 +296,7 @@ flux_plot_immediate <- ggplot(subset(medians_df,adaptation_capacity == "6e-05.40
   theme(legend.text.align = 0)
 flux_plot_immediate
 
-comb_flux_plot <- ggarrange(flux_plot_slow, flux_plot_immediate, ncol = 2, labels =c("A", "B"),  common.legend = TRUE, legend = "bottom", align = "h", font.label = list(size = 10))
-
-
-# Plot single fluxes 
+# Plot single fluxes - redo aggregation
 re_out_2 <- lapply(split_list, FUN=function(input){
   min_dA <- aggregate(input$dA, by = list(input$time), FUN = min)$x
   max_dA <- aggregate(input$dA, by = list(input$time), FUN = max)$x
@@ -358,7 +349,7 @@ re_out_df$time_geol <- re_out_df$time/(-1e+6)
 re_out_df$adaptation_capacity <- interaction(re_out_df$therm_adapt, re_out_df$disp_par)
 
 
-# Silw and locb flux plot
+# Silw and locb flux plot for three scenarios
 ylab <- expression(F[locb] ~ "("*mol ~ C ~ yr^-1*")")
 locb_flux <- ggplot(subset(re_out_df, adaptation_capacity %in% c("2.5e-08.650", "5e-08.650", "6e-05.4000"))) + 
   geom_ribbon(aes(x = time_geol, ymin = min_locb, ymax=max_locb, fill = as.factor(adaptation_capacity)), alpha = 0.5) +
@@ -439,6 +430,7 @@ silw_flux <- ggplot(subset(re_out_df, disp_par == 650 & therm_adapt < 6.0e-05 | 
   theme(legend.key.size = unit(0.35, "cm"))
 silw_flux
 
+# The following are the same for all, not affected by eco-evolutionary dynamics
 ylab <- expression(F[degass] ~ "("*mol ~ C ~ yr^-1*")")
 degass_flux <- ggplot(subset(re_out_df, (disp_par == 4000 & therm_adapt == 60e-06))) + 
   geom_ribbon(aes(x = time_geol, ymin = min_degass, ymax=max_degass, fill = as.factor(adaptation_capacity)), alpha = 0.5, fill = "darkgrey") +
@@ -695,7 +687,7 @@ summary_out_slow <- readRDS("../Version_14_Aug23/OUTPUT_collection/model_V14E/su
 summary_out_immediate <- readRDS("../Version_14_Aug23/OUTPUT_collection/model_V14E/summary_out_immediate_ID240.rds")
 summary_out_intermediate <- readRDS("../Version_14_Aug23/OUTPUT_collection/model_V14E/summary_out_intermediate_ID211.rds")
 
-# Factor by which burial rate / (or energy conversion factor) is multiplied to obtian 3.5e+12 mol C locb per year
+# Factor by which burial rate / (or energy conversion factor) is multiplied to obtian 3.5e+12 mol C locb per year (calibration is different for every run)
 calibration_conv_factor_slow <- tail(summary_out_slow$locb, n = 1)/det_out_slow_raster$productivity_adapt_sum_global[1]
 calibration_conv_factor_immediate <- tail(summary_out_immediate$locb, n = 1)/det_out_immediate_raster$productivity_adapt_sum_global[1]
 calibration_conv_factor_intermediate <- tail(summary_out_intermediate$locb, n = 1)/det_out_intermediate_raster$productivity_adapt_sum_global[1]
@@ -770,34 +762,6 @@ p_immediate <- ggplot() +
   theme(text = element_text(size = 6))
 p_immediate
 
-
-NPP_real <- raster("~/PhD_new/Data/NPP_data/ISLSCP_MODEL_NPP_1027/data/model_npp_1deg/model_npp_1deg/modeled_npp_average_1d.asc")
-crs(NPP_real) <- "+proj=longlat +datum=WGS84 +no_defs"
-NPP_real <- resample(NPP_real, det_out_slow_raster, method = "bilinear")
-crs(NPP_real) <- "+proj=longlat +datum=WGS84 +no_defs"
-NPP_real[is.na(det_out_slow_raster$productivity_adapt)] <- NA
-NPP_real_normalized <- NPP_real/max(values(NPP_real), na.rm=T)
-plot(NPP_real_normalized)
-
-NPP_real_normalized <- raster::projectRaster(NPP_real_normalized, crs = robinson)
-NPP_real_normalized_df <- as.data.frame(NPP_real_normalized, xy = T)
-colnames(NPP_real_normalized_df) <- c("x", "y", "norm_npp_pot")
-
-# Actual productivity (measured/modelled Cramer -> but for higher CO2 ppm)
-title <- expression("Measured productivity potential\n(NPP/NPPmax)")
-p_real <- ggplot() + 
-  geom_raster(data = NPP_real_normalized_df, aes(x = x, y = y, fill = norm_npp_pot)) + 
-  scale_fill_gradient2(title,  low = "#E5D0B1", mid = "#729E39", high = "#084113", na.value = "white", limits=c(0, 1), midpoint = 0.5, oob=squish) +
-  geom_sf(data = bb_robinson, colour = 'black', linetype = 'solid', fill = NA, size = 0.2) + 
-  theme_void() + 
-  theme(legend.position = "bottom") + 
-  geom_sf(data=countries_robinson,
-          colour='#76767A',
-          linetype='solid',
-          fill= NA,
-          size=0.1) + 
-  theme(text = element_text(size = 6))
-p_real
 
 
 # Illustration of productivity and weathering potential for three timesteps of intermediate model 
@@ -1005,7 +969,6 @@ silw
 
 
 # Alternative Hypothesis Models
-
 # A) Default - reference scenario 
 # Import results 
 out_A <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/default/compiled_output_default_A.rds")
@@ -1017,7 +980,7 @@ out_F <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/default/comp
 out_G <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/default/compiled_output_default_G.rds")
 out_H <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/default/compiled_output_default_H.rds")
 out_C <- lapply(out_C, function(input){
-  output <- input[, -c(14:25)]
+  output <- input[, -c(14:25)] # some cleaning for script C
   return(output)
   })
 out_default <- c(out_A, out_B, out_C, out_D, out_E, out_F, out_G, out_H)
@@ -1065,7 +1028,6 @@ temp_imbalance <- ggplot(subset(re_out_default_df, disp_par == 650 & therm_adapt
   theme(axis.title.x = element_text(vjust= 8)) + 
   theme(plot.margin = unit(c(0.25, 0.25, 0, 0), "cm")) + 
   theme(legend.position = "left", legend.box.spacing = unit(0, "pt"))
-
 temp_imbalance
 
 
@@ -1088,8 +1050,7 @@ boxplot_default
 
 
 
-# B) Strong erosion locb feedback - reference scenario 
-# Import results 
+# B) Strong erosion locb feedback
 out_A <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/high_locb_erosion_feedback/compiled_output_high_erosion_A.rds")
 out_B <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/high_locb_erosion_feedback/compiled_output_high_erosion_B.rds")
 out_C <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/high_locb_erosion_feedback/compiled_output_high_erosion_C.rds")
@@ -1167,7 +1128,6 @@ boxplot_highlocberosion
 
 
 # C) weak erosion locb feedback
-# Import results 
 out_A <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/low_locb_erosion_feedback/compiled_output_low_erosion_A.rds")
 out_B <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/low_locb_erosion_feedback/compiled_output_low_erosion_B.rds")
 out_C <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/low_locb_erosion_feedback/compiled_output_low_erosion_C.rds")
@@ -1221,7 +1181,6 @@ temp_imbalance <- ggplot(subset(re_out_lowlocberosion_df, disp_par == 650 & ther
   theme(axis.title.x = element_text(vjust= 8)) + 
   theme(plot.margin = unit(c(0.25, 0.25, 0, 0), "cm")) + 
   theme(legend.position = "left", legend.box.spacing = unit(0, "pt"))
-
 temp_imbalance
 
 
@@ -1243,8 +1202,7 @@ boxplot_lowlocberosion <- ggplot(out_lowlocberosion_boxplot) +
 boxplot_lowlocberosion
 
 
-# D) low silicate weathering activation eneregy 
-# Import results 
+# D) low silicate weathering activation energy 
 out_A <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/low_silw_clim_respons/compiled_output_lowresponse_A.rds")
 out_B <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/low_silw_clim_respons/compiled_output_lowresponse_B.rds")
 out_C <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/low_silw_clim_respons/compiled_output_lowresponse_C.rds")
@@ -1254,11 +1212,9 @@ out_F <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/low_silw_cli
 out_G <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/low_silw_clim_respons/compiled_output_lowresponse_G.rds")
 out_H <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/low_silw_clim_respons/compiled_output_lowresponse_H.rds")
 out_lowsilwclimresponse <- c(out_A, out_B, out_C, out_D, out_E, out_F, out_G, out_H)
-
 out_lowsilwclimresponse_df <- do.call(rbind.data.frame, out_lowsilwclimresponse)
 
-test <- out_lowsilwclimresponse_df[out_lowsilwclimresponse_df$disp_par == 700 & out_lowsilwclimresponse_df$therm_adapt == 0.1/1e+6 & out_lowsilwclimresponse_df$CO2_range == "mid" & out_lowsilwclimresponse_df$degass_range == "mid", ]
-points(test$time, test$silw, col = "blue")
+
 
 split_list <- split(out_lowsilwclimresponse_df, f=list(out_lowsilwclimresponse_df$therm_adapt, out_lowsilwclimresponse_df$disp_par))
 re_out_lowsilwclimresponse <- lapply(split_list, FUN=function(input){
@@ -1301,7 +1257,6 @@ temp_imbalance <- ggplot(subset(re_out_lowsilwclimresponse_df, disp_par == 650 &
   theme(axis.title.x = element_text(vjust= 8)) + 
   theme(plot.margin = unit(c(0.25, 0.25, 0, 0), "cm")) + 
   theme(legend.position = "left", legend.box.spacing = unit(0, "pt"))
-
 temp_imbalance
 
 
@@ -1323,8 +1278,7 @@ boxplot_lowsilwclimresponse <- ggplot(out_lowsilwclimresponse_boxplot) +
 boxplot_lowsilwclimresponse
 
 
-# E) High silicate weathering activation eneregy 
-# Import results 
+# E) High silicate weathering activation energy 
 out_A <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/high_silw_clim_respons/compiled_output_highresponse_A.rds")
 out_B <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/high_silw_clim_respons/compiled_output_highresponse_B.rds")
 out_C <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/high_silw_clim_respons/compiled_output_highresponse_C.rds")
@@ -1336,8 +1290,6 @@ out_H <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/high_silw_cl
 out_highsilwclimresponse <- c(out_A, out_B, out_C, out_D, out_E, out_F, out_G, out_H)
 out_highsilwclimresponse_df <- do.call(rbind.data.frame, out_highsilwclimresponse)
 
-test <- out_highsilwclimresponse_df[out_highsilwclimresponse_df$disp_par == 700 & out_highsilwclimresponse_df$therm_adapt == 0.1/1e+6 & out_highsilwclimresponse_df$CO2_range == "mid" & out_highsilwclimresponse_df$degass_range == "mid", ]
-points(test$time, test$silw, col = "red")
 
 split_list <- split(out_highsilwclimresponse_df, f=list(out_highsilwclimresponse_df$therm_adapt, out_highsilwclimresponse_df$disp_par))
 re_out_highsilwclimresponse <- lapply(split_list, FUN=function(input){
@@ -1380,7 +1332,6 @@ temp_imbalance <- ggplot(subset(re_out_highsilwclimresponse_df, disp_par == 650 
   theme(axis.title.x = element_text(vjust= 8)) + 
   theme(plot.margin = unit(c(0.25, 0.25, 0, 0), "cm")) + 
   theme(legend.position = "left", legend.box.spacing = unit(0, "pt"))
-
 temp_imbalance
 
 
@@ -1403,7 +1354,6 @@ boxplot_highsilwclimresponse
 
 
 # F) With CO2 fertilization effect 
-# Import results 
 out_A <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/with_co2_fert/compiled_output_co2_fert_A.rds")
 out_B <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/with_co2_fert/compiled_output_co2_fert_B.rds")
 out_C <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/with_co2_fert/compiled_output_co2_fert_C.rds")
@@ -1457,7 +1407,6 @@ temp_imbalance <- ggplot(subset(re_out_withco2fert_df, disp_par == 650 & therm_a
   theme(axis.title.x = element_text(vjust= 8)) + 
   theme(plot.margin = unit(c(0.25, 0.25, 0, 0), "cm")) + 
   theme(legend.position = "left", legend.box.spacing = unit(0, "pt"))
-
 temp_imbalance
 
 
@@ -1481,7 +1430,6 @@ boxplot_withco2fert
 
 
 # G) PREPLANT of 0.25
-# Import results 
 out_A <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/low_weathering_enhancement/compiled_output_default_A.rds")
 out_B <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/low_weathering_enhancement/compiled_output_default_B.rds")
 out_C <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/low_weathering_enhancement/compiled_output_default_C.rds")
@@ -1491,7 +1439,6 @@ out_F <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/low_weatheri
 out_G <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/low_weathering_enhancement/compiled_output_default_G.rds")
 out_H <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/low_weathering_enhancement/compiled_output_default_H.rds")
 out_lowenh<- c(out_A, out_B, out_C, out_D, out_E, out_F, out_G, out_H)
-
 out_lowenh_df <- do.call(rbind.data.frame, out_lowenh)
 
 
@@ -1536,7 +1483,6 @@ temp_imbalance <- ggplot(subset(re_out_lowenh_df, disp_par == 650 & therm_adapt 
   theme(axis.title.x = element_text(vjust= 8)) + 
   theme(plot.margin = unit(c(0.25, 0.25, 0, 0), "cm")) + 
   theme(legend.position = "left", legend.box.spacing = unit(0, "pt"))
-
 temp_imbalance
 
 
@@ -1557,8 +1503,7 @@ boxplot_lowenh <- ggplot(out_lowenh_boxplot) +
 boxplot_lowenh
 
 
-# I) silicate weathering CO2 fertilization
-# Import results 
+# I) silicate weathering CO2 enhancement in the absence of plants
 out_A <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/with_silwco2_fert/compiled_output_co2_fert_A.rds")
 out_B <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/with_silwco2_fert/compiled_output_co2_fert_B.rds")
 out_C <- readRDS("../Version_14_Aug23/OUTPUT_collection/supp_models/with_silwco2_fert/compiled_output_co2_fert_C.rds")
